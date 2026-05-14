@@ -1,0 +1,148 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { listDrafts } from "@/lib/api";
+import { formatDate, truncate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+
+interface Draft {
+  id: string;
+  title: string;
+  content: string;
+  draft_type: string;
+  hook: string | null;
+  cta: string | null;
+  style_match_score: number;
+  status: string;
+  version: number;
+  created_at: string;
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  professional: "Professional",
+  story: "Story",
+  controversial: "Controversial",
+};
+
+export default function DraftStudioPage() {
+  const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDraft, setSelectedDraft] = useState<Draft | null>(null);
+  const [editedContent, setEditedContent] = useState("");
+
+  useEffect(() => {
+    loadDrafts();
+  }, []);
+
+  async function loadDrafts() {
+    try {
+      const result = await listDrafts();
+      setDrafts(result.drafts);
+    } catch (err) {
+      console.error("Failed to load drafts:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Draft Studio</h1>
+        <p className="text-gray-500 mt-1">Review and edit generated content drafts</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Draft List */}
+        <div className="lg:col-span-1 space-y-3">
+          <h2 className="text-sm font-medium text-gray-500 uppercase">Drafts ({drafts.length})</h2>
+          {loading ? (
+            <p className="text-gray-500 text-sm">Loading...</p>
+          ) : drafts.length === 0 ? (
+            <div className="p-4 bg-white rounded-lg border border-gray-200 text-center text-gray-500 text-sm">
+              No drafts yet. Start a workflow to generate content.
+            </div>
+          ) : (
+            drafts.map((draft) => (
+              <button
+                key={draft.id}
+                onClick={() => {
+                  setSelectedDraft(draft);
+                  setEditedContent(draft.content);
+                }}
+                className={cn(
+                  "w-full text-left p-4 rounded-lg border transition-colors",
+                  selectedDraft?.id === draft.id
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                )}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs px-2 py-0.5 bg-gray-100 rounded">{TYPE_LABELS[draft.draft_type] || draft.draft_type}</span>
+                  <span className="text-xs text-gray-400">v{draft.version}</span>
+                </div>
+                <p className="text-sm font-medium text-gray-900">{truncate(draft.title, 40)}</p>
+                <p className="text-xs text-gray-500 mt-1">{formatDate(draft.created_at)}</p>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Draft Editor */}
+        <div className="lg:col-span-2">
+          {selectedDraft ? (
+            <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">{selectedDraft.title}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded">{TYPE_LABELS[selectedDraft.draft_type]}</span>
+                    <span className="text-xs text-gray-500">Style Match: {(selectedDraft.style_match_score * 100).toFixed(0)}%</span>
+                    <span className="text-xs text-gray-500">Version {selectedDraft.version}</span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedDraft.hook && (
+                <div className="p-3 bg-amber-50 rounded-lg">
+                  <p className="text-xs font-medium text-amber-700 mb-1">Hook</p>
+                  <p className="text-sm text-amber-900">{selectedDraft.hook}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Content</label>
+                <textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  rows={16}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+
+              {selectedDraft.cta && (
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs font-medium text-green-700 mb-1">Call to Action</p>
+                  <p className="text-sm text-green-900">{selectedDraft.cta}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                  Copy to Clipboard
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-500">
+              Select a draft to view and edit
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
