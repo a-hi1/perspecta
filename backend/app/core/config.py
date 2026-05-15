@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-m3"
     EMBEDDING_DEVICE: str = "cpu"
     EMBEDDING_DIMENSION: int = 1024
+    HF_ENDPOINT: str = "https://hf-mirror.com"
 
     # --- RAG ---
     CHUNK_SIZE: int = 512
@@ -84,6 +85,7 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8",
         "case_sensitive": True,
+        "extra": "ignore",
     }
 
 

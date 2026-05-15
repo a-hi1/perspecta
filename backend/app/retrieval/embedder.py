@@ -1,5 +1,6 @@
 """Embedding service using bge-m3."""
 
+import os
 from functools import lru_cache
 
 import numpy as np
@@ -23,6 +24,10 @@ class EmbeddingService:
         """Lazy-load the embedding model."""
         if self._model is None:
             try:
+                # Set HF mirror endpoint for faster download in China
+                settings = get_settings()
+                if settings.HF_ENDPOINT:
+                    os.environ["HF_ENDPOINT"] = settings.HF_ENDPOINT
                 from sentence_transformers import SentenceTransformer
                 self._model = SentenceTransformer(self.model_name, device=self.device)
             except ImportError:
