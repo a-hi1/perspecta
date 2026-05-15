@@ -54,7 +54,7 @@ async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(error.detail || `API error: ${res.status}`);
+    throw new Error(error.detail || `请求错误: ${res.status}`);
   }
   return res.json();
 }
@@ -106,7 +106,7 @@ export async function uploadDocument(file: File): Promise<Document> {
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(error.detail || `Upload error: ${res.status}`);
+    throw new Error(error.detail || `上传错误: ${res.status}`);
   }
   return res.json();
 }

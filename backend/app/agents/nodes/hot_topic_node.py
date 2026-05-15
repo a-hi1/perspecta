@@ -74,21 +74,21 @@ class HotTopicNode:
         Production: Calls Reddit API, HN API, Arxiv API.
         """
         return f"""
-        Recent tech discussions related to: {query or "software engineering"}
+        与以下话题相关的近期技术讨论: {query or "软件工程"}
 
         [Hacker News]
-        - "Why we moved from microservices back to a monolith"
-        - "The case against AI-assisted coding"
-        - "Our experience scaling to 1M users with SQLite"
+        - "为什么我们从微服务回到了单体架构"
+        - "反对 AI 辅助编程的理由"
+        - "我们用 SQLite 支撑 100 万用户的经历"
 
         [Reddit r/programming]
-        - "Unpopular opinion: TDD is overrated for startups"
-        - "After 10 years of React, here's what I'd choose today"
-        - "We reduced our AWS bill by 80% with this one weird trick"
+        - "不受欢迎的观点：TDD 对创业公司来说被高估了"
+        - "用了 10 年 React 之后，我今天会选择什么"
+        - "我们用这个方法把 AWS 账单降低了 80%"
 
         [Arxiv]
-        - "Rethinking RAG: Why retrieval alone isn't enough"
-        - "The diminishing returns of larger language models"
+        - "重新思考 RAG：为什么仅靠检索是不够的"
+        - "更大语言模型的边际收益递减"
         """
 
     def _parse_topics(self, response_text: str) -> list[HotTopicData]:

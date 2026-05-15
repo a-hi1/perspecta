@@ -6,22 +6,22 @@ changelog: |
   v1.0.0 - Initial creation
 ---
 
-Structure:
+结构：
 
-[Hook - Data or insight that establishes authority]
+[开头 - 建立权威的数据或洞察]
 
-[Context - Brief background of the topic/industry trend]
+[背景 - 话题/行业趋势的简要背景]
 
-[Core Insight - Your unique perspective backed by experience]
+[核心洞察 - 基于经验的独特观点]
 
-[Evidence - Specific examples from your work/knowledge]
+[证据 - 来自工作/知识的具体案例]
 
-[Conclusion - Key takeaway]
+[结论 - 关键要点]
 
-[CTA - Genuine question to spark discussion]
+[CTA - 引发讨论的真诚问题]
 
-Guidelines:
-- Use concrete numbers and data points when available
-- Keep paragraphs short (2-3 sentences max)
-- Authority comes from specificity, not from claiming to be an expert
-- End with a question that invites experience-sharing, not just opinions
+指南：
+- 尽可能使用具体数字和数据
+- 保持段落简短（最多2-3句话）
+- 权威来自具体性，而不是自称专家
+- 以邀请分享经验的问题结尾，而不仅仅是征求观点

@@ -6,25 +6,25 @@ changelog: |
   v1.0.0 - Initial creation
 ---
 
-Structure:
+结构：
 
-[Hook - A moment in time, a decision, a realization]
+[开头 - 某个时刻、某个决定、某个顿悟]
 
-[Setup - What was the situation? What was at stake?]
+[铺垫 - 当时的情况是什么？有什么风险？]
 
-[Journey - What happened? What did you try?]
+[经过 - 发生了什么？你尝试了什么？]
 
-[Turn - The moment of insight or surprise]
+[转折 - 洞察或惊讶的时刻]
 
-[Lesson - What you learned, stated simply]
+[收获 - 你学到了什么，简洁表达]
 
-[Reflection - How this changed your approach]
+[反思 - 这如何改变了你的方法]
 
-[CTA - Invite others to share their similar stories]
+[CTA - 邀请他人分享类似经历]
 
-Guidelines:
-- Start in the middle of the action, not with "I remember when..."
-- Use specific details (dates, numbers, names if appropriate)
-- The "turn" is the most important moment — make it clear
-- Keep it honest — vulnerability builds connection
-- Don't over-moralize the story
+指南：
+- 从行动中间开始，不要用"我记得那时候..."
+- 使用具体细节（日期、数字、合适的情况下用名字）
+- "转折"是最重要的时刻 —— 让它清晰
+- 保持真诚 —— 脆弱建立连接
+- 不要过度说教故事的寓意

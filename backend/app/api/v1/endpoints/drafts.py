@@ -34,7 +34,7 @@ async def get_draft(
     result = await session.execute(select(Draft).where(Draft.id == draft_id))
     draft = result.scalar_one_or_none()
     if not draft:
-        raise HTTPException(status_code=404, detail="Draft not found")
+        raise HTTPException(status_code=404, detail="草稿未找到")
     return draft
 
 
@@ -48,7 +48,7 @@ async def update_draft(
     result = await session.execute(select(Draft).where(Draft.id == draft_id))
     draft = result.scalar_one_or_none()
     if not draft:
-        raise HTTPException(status_code=404, detail="Draft not found")
+        raise HTTPException(status_code=404, detail="草稿未找到")
 
     # Save version history
     version = DraftVersion(

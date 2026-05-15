@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # --- App ---
-    APP_NAME: str = "Personal Experience Amplifier"
+    APP_NAME: str = "个人经验放大器"
     APP_VERSION: str = "0.1.0"
     ENVIRONMENT: Environment = Environment.DEVELOPMENT
     DEBUG: bool = True

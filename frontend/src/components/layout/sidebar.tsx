@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: " " },
-  { href: "/knowledge-base", label: "Knowledge Base", icon: " " },
-  { href: "/perspectives", label: "Perspectives", icon: " " },
-  { href: "/draft-studio", label: "Draft Studio", icon: " " },
-  { href: "/review-queue", label: "Review Queue", icon: " " },
+  { href: "/dashboard", label: "工作台", icon: " " },
+  { href: "/knowledge-base", label: "知识库", icon: " " },
+  { href: "/perspectives", label: "观点发现", icon: " " },
+  { href: "/draft-studio", label: "草稿编辑", icon: " " },
+  { href: "/review-queue", label: "审核队列", icon: " " },
 ];
 
 export function Sidebar() {
@@ -19,8 +19,8 @@ export function Sidebar() {
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">PEA</h1>
-        <p className="text-xs text-gray-500 mt-1">Personal Experience Amplifier</p>
+        <h1 className="text-xl font-bold text-gray-900">Perspecta</h1>
+        <p className="text-xs text-gray-500 mt-1">个人经验放大器</p>
       </div>
 
       {/* Navigation */}
@@ -52,8 +52,8 @@ export function Sidebar() {
             <span className="text-sm font-medium text-blue-700">U</span>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">Default User</p>
-            <p className="text-xs text-gray-500">MVP Mode</p>
+            <p className="text-sm font-medium text-gray-900">默认用户</p>
+            <p className="text-xs text-gray-500">MVP 模式</p>
           </div>
         </div>
       </div>

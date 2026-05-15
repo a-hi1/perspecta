@@ -127,8 +127,8 @@ class ContentGenerationWorkflow:
 
             self.tracer.finish(status="completed", final_state=state.to_dict())
             self.logger.log_execution(
-                input_summary=f"User: {user_id}, Query: {topic_query}",
-                output_summary=f"Status: {state.status.value}",
+                input_summary=f"用户: {user_id}, 查询: {topic_query}",
+                output_summary=f"状态: {state.status.value}",
                 latency_ms=self.tracer.trace.total_latency_ms,
                 tokens_used=self.tracer.trace.total_tokens,
             )
@@ -138,8 +138,8 @@ class ContentGenerationWorkflow:
             self.tracer.finish_with_error(str(e))
             state.mark_failed(str(e))
             self.logger.log_execution(
-                input_summary=f"User: {user_id}, Query: {topic_query}",
-                output_summary=f"FAILED: {e}",
+                input_summary=f"用户: {user_id}, 查询: {topic_query}",
+                output_summary=f"失败: {e}",
                 latency_ms=self.tracer.trace.total_latency_ms,
                 error=str(e),
             )
@@ -235,7 +235,7 @@ class ContentGenerationWorkflow:
         except Exception as e:
             self.logger.log_execution(
                 input_summary="Evaluation",
-                output_summary=f"Evaluation failed: {e}",
+                output_summary=f"评估失败: {e}",
                 latency_ms=0,
                 error=str(e),
             )

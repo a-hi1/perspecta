@@ -38,5 +38,5 @@ async def get_hot_topic(
     topic = result.scalar_one_or_none()
     if not topic:
         from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Topic not found")
+        raise HTTPException(status_code=404, detail="话题未找到")
     return topic

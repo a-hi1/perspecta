@@ -82,7 +82,7 @@ async def get_workflow_state(workflow_id: str):
     """Get the current state of a workflow."""
     state = _workflow_states.get(workflow_id)
     if not state:
-        raise HTTPException(status_code=404, detail="Workflow not found")
+        raise HTTPException(status_code=404, detail="工作流未找到")
     return _state_to_response(state)
 
 
@@ -95,11 +95,11 @@ async def approve_workflow(workflow_id: str, request: WorkflowApprovalRequest):
     """
     state = _workflow_states.get(workflow_id)
     if not state:
-        raise HTTPException(status_code=404, detail="Workflow not found")
+        raise HTTPException(status_code=404, detail="工作流未找到")
     if state.status != WorkflowStatus.WAITING_APPROVAL:
         raise HTTPException(
             status_code=400,
-            detail=f"Workflow is not waiting for approval. Current status: {state.status.value}",
+            detail=f"工作流不在等待审核状态。当前状态: {state.status.value}",
         )
 
     workflow = _get_workflow()
@@ -116,11 +116,11 @@ async def reject_workflow(workflow_id: str, request: WorkflowRejectionRequest):
     """
     state = _workflow_states.get(workflow_id)
     if not state:
-        raise HTTPException(status_code=404, detail="Workflow not found")
+        raise HTTPException(status_code=404, detail="工作流未找到")
     if state.status != WorkflowStatus.WAITING_APPROVAL:
         raise HTTPException(
             status_code=400,
-            detail=f"Workflow is not waiting for approval. Current status: {state.status.value}",
+            detail=f"工作流不在等待审核状态。当前状态: {state.status.value}",
         )
 
     workflow = _get_workflow()

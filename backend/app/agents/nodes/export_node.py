@@ -22,11 +22,11 @@ class ExportNode:
 
         draft = state.adapted_draft or state.selected_draft
         if not draft:
-            state.mark_failed("No draft to export")
+            state.mark_failed("没有可导出的草稿")
             return state
 
         if not state.human_approved:
-            state.mark_failed("Cannot export without human approval")
+            state.mark_failed("未经人工审核无法导出")
             return state
 
         # Format for export

@@ -48,8 +48,8 @@ export default function PerspectivesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Perspective Discovery</h1>
-        <p className="text-gray-500 mt-1">Your genuine viewpoints extracted from your knowledge base</p>
+        <h1 className="text-2xl font-bold text-gray-900">观点发现</h1>
+        <p className="text-gray-500 mt-1">从你的知识库中提取的真实观点</p>
       </div>
 
       {/* Filters */}
@@ -65,17 +65,17 @@ export default function PerspectivesPage() {
                 : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
             )}
           >
-            {type || "All"}
+            {type || "全部"}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading perspectives...</div>
+        <div className="text-center py-12 text-gray-500">加载观点中...</div>
       ) : perspectives.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <p className="text-gray-500">No perspectives discovered yet.</p>
-          <p className="text-sm text-gray-400 mt-1">Run a content generation workflow to discover your viewpoints.</p>
+          <p className="text-gray-500">暂未发现观点。</p>
+          <p className="text-sm text-gray-400 mt-1">运行内容生成工作流来发现你的观点。</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -85,14 +85,14 @@ export default function PerspectivesPage() {
                 <span className={cn("text-xs px-2 py-1 rounded-full font-medium", TYPE_COLORS[p.perspective_type] || TYPE_COLORS.summary)}>
                   {p.perspective_type}
                 </span>
-                <span className="text-xs text-gray-500">Confidence: {(p.confidence * 100).toFixed(0)}%</span>
-                <span className="text-xs text-gray-500">Novelty: {(p.novelty * 100).toFixed(0)}%</span>
-                <span className="text-xs text-gray-500">Engagement: {(p.engagement_potential * 100).toFixed(0)}%</span>
+                <span className="text-xs text-gray-500">置信度: {(p.confidence * 100).toFixed(0)}%</span>
+                <span className="text-xs text-gray-500">新颖度: {(p.novelty * 100).toFixed(0)}%</span>
+                <span className="text-xs text-gray-500">互动性: {(p.engagement_potential * 100).toFixed(0)}%</span>
               </div>
               <p className="text-gray-800 text-lg">{p.perspective_text}</p>
               {p.user_feedback && (
                 <div className="mt-3 p-3 bg-blue-50 rounded text-sm text-blue-800">
-                  Your feedback: {p.user_feedback}
+                  你的反馈: {p.user_feedback}
                 </div>
               )}
             </div>

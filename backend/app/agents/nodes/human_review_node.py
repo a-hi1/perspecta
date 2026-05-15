@@ -26,7 +26,7 @@ class HumanReviewNode:
         """
         draft = state.adapted_draft or state.selected_draft
         if not draft:
-            state.mark_failed("No draft for review")
+            state.mark_failed("没有待审核的草稿")
             return state
 
         state.transition_to(AgentNode.HUMAN_REVIEW)
@@ -34,7 +34,7 @@ class HumanReviewNode:
 
         self.logger.log_execution(
             input_summary=f"Draft: {draft.title}",
-            output_summary="Waiting for human approval",
+            output_summary="等待人工审核",
             latency_ms=0,
         )
 

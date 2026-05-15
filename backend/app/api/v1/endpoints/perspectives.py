@@ -39,7 +39,7 @@ async def get_perspective(
     )
     perspective = result.scalar_one_or_none()
     if not perspective:
-        raise HTTPException(status_code=404, detail="Perspective not found")
+        raise HTTPException(status_code=404, detail="观点未找到")
     return perspective
 
 
@@ -55,8 +55,8 @@ async def update_perspective_feedback(
     )
     perspective = result.scalar_one_or_none()
     if not perspective:
-        raise HTTPException(status_code=404, detail="Perspective not found")
+        raise HTTPException(status_code=404, detail="观点未找到")
 
     perspective.user_feedback = feedback
     await session.commit()
-    return {"status": "updated", "perspective_id": perspective_id}
+    return {"status": "已更新", "perspective_id": perspective_id}

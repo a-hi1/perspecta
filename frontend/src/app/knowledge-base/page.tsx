@@ -43,7 +43,7 @@ export default function KnowledgeBasePage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this document and all its chunks?")) return;
+    if (!confirm("确定删除此文档及其所有分块？")) return;
     try {
       await deleteDocument(id);
       await loadDocuments();
@@ -63,8 +63,8 @@ export default function KnowledgeBasePage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
-          <p className="text-gray-500 mt-1">Upload and manage your documents</p>
+          <h1 className="text-2xl font-bold text-gray-900">知识库</h1>
+          <p className="text-gray-500 mt-1">上传和管理你的文档</p>
         </div>
         <div>
           <input
@@ -84,29 +84,29 @@ export default function KnowledgeBasePage() {
                 : "bg-blue-600 text-white hover:bg-blue-700"
             )}
           >
-            {uploading ? "Uploading..." : "Upload Document"}
+            {uploading ? "上传中..." : "上传文档"}
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading documents...</div>
+        <div className="text-center py-12 text-gray-500">加载文档中...</div>
       ) : documents.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <p className="text-gray-500">No documents uploaded yet.</p>
-          <p className="text-sm text-gray-400 mt-1">Upload PDF, Markdown, or TXT files to build your knowledge base.</p>
+          <p className="text-gray-500">暂无已上传的文档。</p>
+          <p className="text-sm text-gray-400 mt-1">上传 PDF、Markdown 或 TXT 文件来构建你的知识库。</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Chunks</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uploaded</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">标题</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分块</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">上传时间</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -126,7 +126,7 @@ export default function KnowledgeBasePage() {
                       onClick={() => handleDelete(doc.id)}
                       className="text-sm text-red-600 hover:text-red-800"
                     >
-                      Delete
+                      删除
                     </button>
                   </td>
                 </tr>

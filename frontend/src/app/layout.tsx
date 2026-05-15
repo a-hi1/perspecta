@@ -6,8 +6,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PEA - Personal Experience Amplifier",
-  description: "AI-powered perspective discovery and content curation system",
+  title: "Perspecta - 个人经验放大器",
+  description: "AI 驱动的观点发现与内容策划系统",
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body className={inter.className}>
         <div className="flex h-screen bg-gray-50">
           <Sidebar />

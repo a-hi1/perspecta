@@ -9,25 +9,25 @@ api_router = APIRouter()
 api_router.include_router(
     documents.router,
     prefix="/documents",
-    tags=["Knowledge Base"],
+    tags=["知识库"],
 )
 api_router.include_router(
     workflow.router,
     prefix="/workflow",
-    tags=["Agent Workflow"],
+    tags=["Agent 工作流"],
 )
 api_router.include_router(
     drafts.router,
     prefix="/drafts",
-    tags=["Drafts"],
+    tags=["草稿"],
 )
 api_router.include_router(
     topics.router,
     prefix="/topics",
-    tags=["Hot Topics"],
+    tags=["热点话题"],
 )
 api_router.include_router(
     perspectives.router,
     prefix="/perspectives",
-    tags=["Perspectives"],
+    tags=["观点"],
 )

@@ -6,26 +6,26 @@ changelog: |
   v1.0.0 - Initial creation
 ---
 
-Structure:
+结构：
 
-[Hook - The bold claim or contrarian statement]
+[开头 - 大胆的主张或逆向观点]
 
-[The mainstream view - What most people believe]
+[主流观点 - 多数人的看法]
 
-[Your challenge - Why you disagree, based on experience]
+[你的挑战 - 基于经验的不同意见]
 
-[Evidence - Concrete examples that prove your point]
+[证据 - 证明你观点的具体案例]
 
-[Nuance - Acknowledge where the mainstream view has merit]
+[细微之处 - 承认主流观点的合理之处]
 
-[Refined position - Your more nuanced take]
+[修正立场 - 你更细致的看法]
 
-[CTA - Ask who else has experienced this]
+[CTA - 询问谁有类似经历]
 
-Guidelines:
-- The hook must be a genuine belief, not manufactured controversy
-- Always ground the contrarian view in real experience
-- Acknowledge the other side — this builds credibility, not weakness
-- Avoid absolute statements ("never", "always") unless truly warranted
-- The goal is to spark thoughtful debate, not outrage
-- Don't be contrarian for the sake of it — the perspective must be authentic
+指南：
+- 开头必须是真实信念，不是制造争议
+- 始终将逆向观点建立在真实经验之上
+- 承认对方 —— 这建立信任，而非示弱
+- 避免绝对化表述（"永远"、"总是"），除非确实有充分理由
+- 目标是引发深思熟虑的讨论，不是愤怒
+- 不要为了反对而反对 —— 观点必须是真实的

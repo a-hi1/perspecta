@@ -29,11 +29,11 @@ async def upload_document(
 ):
     """Upload a document (PDF, MD, TXT) to the knowledge base."""
     if not file.filename:
-        raise HTTPException(status_code=400, detail="No file provided")
+        raise HTTPException(status_code=400, detail="未提供文件")
 
     suffix = Path(file.filename).suffix.lower()
     if suffix not in (".pdf", ".md", ".markdown", ".txt", ".text"):
-        raise HTTPException(status_code=400, detail=f"Unsupported file type: {suffix}")
+        raise HTTPException(status_code=400, detail=f"不支持的文件类型: {suffix}")
 
     # Save file
     file_id = str(uuid.uuid4())
@@ -137,7 +137,7 @@ async def get_document(
     result = await session.execute(select(Document).where(Document.id == document_id))
     doc = result.scalar_one_or_none()
     if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=404, detail="文档未找到")
     return doc
 
 
@@ -179,7 +179,7 @@ async def delete_document(
     result = await session.execute(select(Document).where(Document.id == document_id))
     doc = result.scalar_one_or_none()
     if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=404, detail="文档未找到")
 
     # Delete from vector store
     vector_store = VectorStoreService()
@@ -194,4 +194,4 @@ async def delete_document(
     await session.delete(doc)
     await session.commit()
 
-    return {"status": "deleted", "document_id": document_id}
+    return {"status": "已删除", "document_id": document_id}

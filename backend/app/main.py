@@ -24,7 +24,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
-        description="Personal Experience Amplifier - AI-powered perspective discovery and content curation",
+        description="个人经验放大器 - AI 驱动的观点发现与内容策划系统",
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
@@ -45,7 +45,7 @@ def create_app() -> FastAPI:
     @app.get("/health")
     async def health():
         return {
-            "status": "healthy",
+            "status": "正常",
             "version": settings.APP_VERSION,
             "environment": settings.ENVIRONMENT.value,
         }

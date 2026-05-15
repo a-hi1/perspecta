@@ -19,9 +19,9 @@ interface Draft {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  professional: "Professional",
-  story: "Story",
-  controversial: "Controversial",
+  professional: "专业型",
+  story: "故事型",
+  controversial: "争议型",
 };
 
 export default function DraftStudioPage() {
@@ -48,19 +48,19 @@ export default function DraftStudioPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Draft Studio</h1>
-        <p className="text-gray-500 mt-1">Review and edit generated content drafts</p>
+        <h1 className="text-2xl font-bold text-gray-900">草稿编辑</h1>
+        <p className="text-gray-500 mt-1">查看和编辑生成的内容草稿</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Draft List */}
         <div className="lg:col-span-1 space-y-3">
-          <h2 className="text-sm font-medium text-gray-500 uppercase">Drafts ({drafts.length})</h2>
+          <h2 className="text-sm font-medium text-gray-500 uppercase">草稿 ({drafts.length})</h2>
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading...</p>
+            <p className="text-gray-500 text-sm">加载中...</p>
           ) : drafts.length === 0 ? (
             <div className="p-4 bg-white rounded-lg border border-gray-200 text-center text-gray-500 text-sm">
-              No drafts yet. Start a workflow to generate content.
+              暂无草稿。启动工作流来生成内容。
             </div>
           ) : (
             drafts.map((draft) => (
@@ -97,21 +97,21 @@ export default function DraftStudioPage() {
                   <h2 className="text-lg font-semibold text-gray-900">{selectedDraft.title}</h2>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs px-2 py-1 bg-gray-100 rounded">{TYPE_LABELS[selectedDraft.draft_type]}</span>
-                    <span className="text-xs text-gray-500">Style Match: {(selectedDraft.style_match_score * 100).toFixed(0)}%</span>
-                    <span className="text-xs text-gray-500">Version {selectedDraft.version}</span>
+                    <span className="text-xs text-gray-500">风格匹配: {(selectedDraft.style_match_score * 100).toFixed(0)}%</span>
+                    <span className="text-xs text-gray-500">版本 {selectedDraft.version}</span>
                   </div>
                 </div>
               </div>
 
               {selectedDraft.hook && (
                 <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-xs font-medium text-amber-700 mb-1">Hook</p>
+                  <p className="text-xs font-medium text-amber-700 mb-1">开头吸引</p>
                   <p className="text-sm text-amber-900">{selectedDraft.hook}</p>
                 </div>
               )}
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Content</label>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">正文内容</label>
                 <textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
@@ -122,23 +122,23 @@ export default function DraftStudioPage() {
 
               {selectedDraft.cta && (
                 <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs font-medium text-green-700 mb-1">Call to Action</p>
+                  <p className="text-xs font-medium text-green-700 mb-1">行动号召</p>
                   <p className="text-sm text-green-900">{selectedDraft.cta}</p>
                 </div>
               )}
 
               <div className="flex gap-3">
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-                  Copy to Clipboard
+                  复制到剪贴板
                 </button>
                 <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
-                  Save Changes
+                  保存修改
                 </button>
               </div>
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-500">
-              Select a draft to view and edit
+              选择一份草稿进行查看和编辑
             </div>
           )}
         </div>

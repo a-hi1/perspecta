@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class WorkflowStartRequest(BaseModel):
     """Request to start a new content generation workflow."""
-    topic_query: str = Field(default="", description="Optional topic query. If empty, auto-discovers hot topics.")
+    topic_query: str = Field(default="", description="可选的话题查询。留空则自动发现热点话题。")
 
 
 class WorkflowStateResponse(BaseModel):
@@ -62,10 +62,10 @@ class WorkflowStateResponse(BaseModel):
 class WorkflowApprovalRequest(BaseModel):
     """Human approval of a draft."""
     approved: bool = True
-    edited_content: str | None = Field(default=None, description="Optional edited version of the draft.")
+    edited_content: str | None = Field(default=None, description="可选的草稿编辑版本。")
     feedback: str = ""
 
 
 class WorkflowRejectionRequest(BaseModel):
     """Human rejection of a draft with feedback."""
-    feedback: str = Field(..., description="Why the draft was rejected and what to improve.")
+    feedback: str = Field(..., description="拒绝草稿的原因及改进建议。")

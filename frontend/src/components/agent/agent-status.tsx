@@ -8,16 +8,16 @@ interface AgentStatusProps {
 }
 
 const NODE_LABELS: Record<string, { label: string; icon: string }> = {
-  hot_topic: { label: "Discovering Hot Topics", icon: " " },
-  topic_filter: { label: "Filtering Topics", icon: " " },
-  knowledge_retriever: { label: "Retrieving Knowledge", icon: " " },
-  perspective_discovery: { label: "Discovering Perspectives", icon: " " },
-  angle_planner: { label: "Planning Content Angles", icon: " " },
-  draft_generator: { label: "Generating Draft", icon: " " },
-  style_adapter: { label: "Adapting Style", icon: " " },
-  citation_verifier: { label: "Verifying Citations", icon: " " },
-  human_review: { label: "Awaiting Your Review", icon: " " },
-  export: { label: "Exporting Content", icon: " " },
+  hot_topic: { label: "发现热点话题", icon: " " },
+  topic_filter: { label: "筛选话题", icon: " " },
+  knowledge_retriever: { label: "检索知识", icon: " " },
+  perspective_discovery: { label: "发现观点", icon: " " },
+  angle_planner: { label: "规划内容角度", icon: " " },
+  draft_generator: { label: "生成草稿", icon: " " },
+  style_adapter: { label: "适配风格", icon: " " },
+  citation_verifier: { label: "验证引用", icon: " " },
+  human_review: { label: "等待审核", icon: " " },
+  export: { label: "导出内容", icon: " " },
 };
 
 const STATUS_STYLES: Record<string, string> = {

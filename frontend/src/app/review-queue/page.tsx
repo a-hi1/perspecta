@@ -60,19 +60,19 @@ export default function ReviewQueuePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Review Queue</h1>
-        <p className="text-gray-500 mt-1">Review, approve, or request revisions on generated content</p>
+        <h1 className="text-2xl font-bold text-gray-900">审核队列</h1>
+        <p className="text-gray-500 mt-1">审核、批准或要求修改生成的内容</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Queue */}
         <div className="lg:col-span-1 space-y-3">
-          <h2 className="text-sm font-medium text-gray-500 uppercase">Pending Review ({drafts.length})</h2>
+          <h2 className="text-sm font-medium text-gray-500 uppercase">待审核 ({drafts.length})</h2>
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading...</p>
+            <p className="text-gray-500 text-sm">加载中...</p>
           ) : drafts.length === 0 ? (
             <div className="p-4 bg-white rounded-lg border border-gray-200 text-center text-gray-500 text-sm">
-              No drafts pending review.
+              暂无待审核的草稿。
             </div>
           ) : (
             drafts.map((draft) => (
@@ -102,12 +102,12 @@ export default function ReviewQueuePage() {
             <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">{selectedDraft.title}</h2>
-                <p className="text-sm text-gray-500 mt-1">{selectedDraft.draft_type} | Version {selectedDraft.version}</p>
+                <p className="text-sm text-gray-500 mt-1">{selectedDraft.draft_type} | 版本 {selectedDraft.version}</p>
               </div>
 
               {/* Content Preview */}
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Content</label>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">正文内容</label>
                 <textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
@@ -119,12 +119,12 @@ export default function ReviewQueuePage() {
               {/* Citations */}
               {selectedDraft.citations?.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Source Citations</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">来源引用</h3>
                   <div className="space-y-2">
                     {selectedDraft.citations.map((c: any, i: number) => (
                       <div key={i} className="p-3 bg-gray-50 rounded text-sm">
                         <p className="text-gray-800">"{c.cited_text}"</p>
-                        <p className="text-xs text-gray-500 mt-1">Source: {c.source_file}</p>
+                        <p className="text-xs text-gray-500 mt-1">来源: {c.source_file}</p>
                       </div>
                     ))}
                   </div>
@@ -133,11 +133,11 @@ export default function ReviewQueuePage() {
 
               {/* Feedback */}
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Revision Feedback (if rejecting)</label>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">修改反馈（拒绝时填写）</label>
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Explain what needs to change..."
+                  placeholder="说明需要修改的内容..."
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
@@ -150,20 +150,20 @@ export default function ReviewQueuePage() {
                   disabled={actionLoading}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50"
                 >
-                  Approve & Export
+                  批准并导出
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={actionLoading || !feedback.trim()}
                   className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50"
                 >
-                  Request Revision
+                  要求修改
                 </button>
               </div>
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-500">
-              Select a draft to review
+              选择一份草稿进行审核
             </div>
           )}
         </div>
