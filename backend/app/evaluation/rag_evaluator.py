@@ -136,8 +136,10 @@ class RAGEvaluator:
 
         Returns a hallucination score from 0 (no hallucination) to 1 (likely hallucinated).
         """
-        if not source_chunks or not generated_text:
+        if not generated_text:
             return 0.0
+        if not source_chunks:
+            return 1.0  # No source to verify against = cannot confirm claims
 
         source_texts = "\n---\n".join(
             c.get("content", "")[:300] for c in source_chunks[:5]

@@ -5,9 +5,11 @@ DeepSeek, Qwen, GLM, and Moonshot all expose OpenAI-compatible endpoints.
 """
 
 import time
+import asyncio
+import logging
 from typing import AsyncIterator
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, APIConnectionError, APITimeoutError, RateLimitError
 
 from app.core.exceptions import LLMProviderError
 from app.llm.base import (
@@ -18,6 +20,8 @@ from app.llm.base import (
     LLMStreamResponse,
     LLMUsage,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAICompatibleProvider(BaseLLMProvider):
@@ -46,39 +50,63 @@ class OpenAICompatibleProvider(BaseLLMProvider):
         response_format: dict | None = None,
     ) -> LLMResponse:
         start_time = time.monotonic()
-        try:
-            kwargs: dict = {
-                "model": self.config.model,
-                "messages": [m.to_dict() for m in messages],
-                "temperature": temperature or self.config.temperature,
-                "max_tokens": max_tokens or self.config.max_tokens,
-            }
-            if response_format:
-                kwargs["response_format"] = response_format
+        max_attempts = 3
+        last_error = None
 
-            response = await self._client.chat.completions.create(**kwargs)
+        for attempt in range(1, max_attempts + 1):
+            try:
+                kwargs: dict = {
+                    "model": self.config.model,
+                    "messages": [m.to_dict() for m in messages],
+                    "temperature": temperature or self.config.temperature,
+                    "max_tokens": max_tokens or self.config.max_tokens,
+                }
+                if response_format:
+                    kwargs["response_format"] = response_format
 
-            latency_ms = (time.monotonic() - start_time) * 1000
-            choice = response.choices[0]
-            usage = response.usage
+                response = await self._client.chat.completions.create(**kwargs)
 
-            return LLMResponse(
-                content=choice.message.content or "",
-                model=response.model,
-                usage=LLMUsage(
-                    prompt_tokens=usage.prompt_tokens if usage else 0,
-                    completion_tokens=usage.completion_tokens if usage else 0,
-                    total_tokens=usage.total_tokens if usage else 0,
-                ),
-                finish_reason=choice.finish_reason or "stop",
-                latency_ms=latency_ms,
-            )
-        except Exception as e:
-            raise LLMProviderError(
-                provider=self.provider_name,
-                message=str(e),
-                details={"model": self.config.model},
-            ) from e
+                latency_ms = (time.monotonic() - start_time) * 1000
+                choice = response.choices[0]
+                usage = response.usage
+
+                return LLMResponse(
+                    content=choice.message.content or "",
+                    model=response.model,
+                    usage=LLMUsage(
+                        prompt_tokens=usage.prompt_tokens if usage else 0,
+                        completion_tokens=usage.completion_tokens if usage else 0,
+                        total_tokens=usage.total_tokens if usage else 0,
+                    ),
+                    finish_reason=choice.finish_reason or "stop",
+                    latency_ms=latency_ms,
+                )
+            except (APIConnectionError, APITimeoutError) as e:
+                last_error = e
+                if attempt < max_attempts:
+                    wait = 2 ** attempt
+                    logger.warning(f"LLM 连接失败 (尝试 {attempt}/{max_attempts})，{wait}秒后重试: {e}")
+                    await asyncio.sleep(wait)
+                continue
+            except RateLimitError as e:
+                last_error = e
+                if attempt < max_attempts:
+                    wait = 5 * attempt
+                    logger.warning(f"LLM 限流 (尝试 {attempt}/{max_attempts})，{wait}秒后重试: {e}")
+                    await asyncio.sleep(wait)
+                continue
+            except Exception as e:
+                raise LLMProviderError(
+                    provider=self.provider_name,
+                    message=str(e),
+                    details={"model": self.config.model},
+                ) from e
+
+        raise LLMProviderError(
+            provider=self.provider_name,
+            message=f"连接失败，已重试{max_attempts}次: {last_error}",
+            details={"model": self.config.model},
+        ) from last_error
 
     async def stream_chat(
         self,

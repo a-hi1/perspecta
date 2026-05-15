@@ -44,6 +44,19 @@ export interface Document {
   processed_at: string | null;
 }
 
+export interface DocumentChunk {
+  id: string;
+  document_id: string;
+  content: string;
+  chunk_index: number;
+  source_file: string;
+  section_title: string | null;
+  page_number: number | null;
+  has_opinion: boolean | null;
+  opinion_type: string | null;
+  opinion_text: string | null;
+}
+
 async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -70,6 +83,10 @@ export async function startWorkflow(topicQuery: string = ""): Promise<WorkflowSt
 
 export async function getWorkflowState(workflowId: string): Promise<WorkflowState> {
   return fetchAPI(`/workflow/${workflowId}`);
+}
+
+export async function listWorkflows(): Promise<WorkflowState[]> {
+  return fetchAPI("/workflow/list");
 }
 
 export async function approveWorkflow(
@@ -117,6 +134,10 @@ export async function listDocuments(): Promise<{ documents: Document[]; total: n
 
 export async function deleteDocument(documentId: string): Promise<void> {
   await fetchAPI(`/documents/${documentId}`, { method: "DELETE" });
+}
+
+export async function getDocumentChunks(documentId: string): Promise<DocumentChunk[]> {
+  return fetchAPI(`/documents/${documentId}/chunks`);
 }
 
 // --- Perspectives API ---

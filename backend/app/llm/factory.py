@@ -67,6 +67,8 @@ def create_llm_provider(
         model=settings.LLM_MODEL,
         temperature=settings.LLM_TEMPERATURE,
         max_tokens=settings.LLM_MAX_TOKENS,
+        timeout=settings.LLM_TIMEOUT,
+        max_retries=settings.LLM_MAX_RETRIES,
     )
 
     provider_cls = _PROVIDER_MAP[provider_type]

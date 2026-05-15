@@ -30,7 +30,7 @@ class CitationVerifierNode:
             state.mark_failed("No draft to verify")
             return state
 
-        prompt = self.prompt_loader.get_agent_prompt_content("citation_verifier")
+        prompt = self.prompt_loader.get_full_prompt("citation_verifier_agent")
 
         source_chunks = "\n---\n".join(
             f"### Chunk {i+1} (ID: {r.chunk_id})\nSource: {r.source_file}\n{r.content}"
@@ -41,13 +41,13 @@ class CitationVerifierNode:
             LLMMessage(role=MessageRole.SYSTEM, content=prompt),
             LLMMessage(
                 role=MessageRole.USER,
-                content=f"""## Draft to Verify
+                content=f"""## 待验证的草稿
 {draft.content}
 
-## Source Material
+## 来源材料
 {source_chunks}
 
-Verify all claims and citations. Output as JSON.""",
+请验证所有声明和引用，用简体中文输出 JSON。""",
             ),
         ]
 
@@ -62,7 +62,7 @@ Verify all claims and citations. Output as JSON.""",
         state.verification_score = result["verification_score"]
         state.hallucination_flags = result["hallucination_flags"]
 
-        state.transition_to(AgentNode.CITATION_VERIFIER)
+        state.transition_to(AgentNode.HUMAN_REVIEW)
 
         self.logger.log_execution(
             input_summary=f"Draft: {draft.title}",

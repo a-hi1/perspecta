@@ -30,7 +30,7 @@ class TopicFilterNode:
             state.mark_failed("No hot topics provided")
             return state
 
-        prompt = self.prompt_loader.get_agent_prompt_content("topic_filter_agent")
+        prompt = self.prompt_loader.get_full_prompt("topic_filter_agent")
 
         topics_text = json.dumps(
             [{"title": t.title, "summary": t.summary, "source": t.source} for t in state.hot_topics],
@@ -41,7 +41,7 @@ class TopicFilterNode:
             LLMMessage(role=MessageRole.SYSTEM, content=prompt),
             LLMMessage(
                 role=MessageRole.USER,
-                content=f"Topics to filter:\n{topics_text}\n\nSelect the best topic for content creation.",
+                content=f"待筛选的话题：\n{topics_text}\n\n请选择最适合创建内容的话题，用简体中文回答。",
             ),
         ]
 
@@ -57,7 +57,7 @@ class TopicFilterNode:
         elif state.hot_topics:
             state.selected_topic = state.hot_topics[0]
 
-        state.transition_to(AgentNode.TOPIC_FILTER)
+        state.transition_to(AgentNode.RETRIEVAL_AND_PERSPECTIVE)
 
         self.logger.log_execution(
             input_summary=f"Filtering {len(state.hot_topics)} topics",

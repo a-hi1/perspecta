@@ -29,6 +29,7 @@ export default function DraftStudioPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDraft, setSelectedDraft] = useState<Draft | null>(null);
   const [editedContent, setEditedContent] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     loadDrafts();
@@ -42,6 +43,33 @@ export default function DraftStudioPage() {
       console.error("Failed to load drafts:", err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(editedContent);
+      setSaveMessage("已复制到剪贴板！");
+      setTimeout(() => setSaveMessage(""), 2000);
+    } catch {
+      setSaveMessage("复制失败");
+    }
+  }
+
+  async function handleSave() {
+    if (!selectedDraft) return;
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+      const res = await fetch(`${API_BASE}/drafts/${selectedDraft.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editedContent }),
+      });
+      if (!res.ok) throw new Error("保存失败");
+      setSaveMessage("已保存！");
+      setTimeout(() => setSaveMessage(""), 2000);
+    } catch (err: any) {
+      setSaveMessage(err.message || "保存失败");
     }
   }
 
@@ -127,11 +155,21 @@ export default function DraftStudioPage() {
                 </div>
               )}
 
+              {saveMessage && (
+                <p className="text-sm text-green-600">{saveMessage}</p>
+              )}
+
               <div className="flex gap-3">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                <button
+                  onClick={handleCopy}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                >
                   复制到剪贴板
                 </button>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium"
+                >
                   保存修改
                 </button>
               </div>

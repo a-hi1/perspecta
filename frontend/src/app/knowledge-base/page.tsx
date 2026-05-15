@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { uploadDocument, listDocuments, deleteDocument, type Document } from "@/lib/api";
+import { uploadDocument, listDocuments, deleteDocument, getDocumentChunks, type Document, type DocumentChunk } from "@/lib/api";
 import { formatDate, truncate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,9 @@ export default function KnowledgeBasePage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const [chunks, setChunks] = useState<DocumentChunk[]>([]);
+  const [loadingChunks, setLoadingChunks] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -49,6 +52,19 @@ export default function KnowledgeBasePage() {
       await loadDocuments();
     } catch (err) {
       console.error("Delete failed:", err);
+    }
+  }
+
+  async function handleView(doc: Document) {
+    setSelectedDoc(doc);
+    setLoadingChunks(true);
+    try {
+      const data = await getDocumentChunks(doc.id);
+      setChunks(data);
+    } catch (err) {
+      console.error("Failed to load chunks:", err);
+    } finally {
+      setLoadingChunks(false);
     }
   }
 
@@ -121,7 +137,13 @@ export default function KnowledgeBasePage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatDate(doc.created_at)}</td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right space-x-2">
+                    <button
+                      onClick={() => handleView(doc)}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      查看
+                    </button>
                     <button
                       onClick={() => handleDelete(doc.id)}
                       className="text-sm text-red-600 hover:text-red-800"
@@ -133,6 +155,59 @@ export default function KnowledgeBasePage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {selectedDoc && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">{selectedDoc.title}</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  共 {chunks.length} 个分块 · {new Date(selectedDoc.created_at).toLocaleString('zh-CN')}
+                </p>
+              </div>
+              <button
+                onClick={() => { setSelectedDoc(null); setChunks([]); }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingChunks ? (
+                <div className="text-center py-12 text-gray-500">加载分块中...</div>
+              ) : chunks.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">暂无分块数据</div>
+              ) : (
+                <div className="space-y-4">
+                  {chunks.map((chunk, idx) => (
+                    <div key={chunk.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          分块 {idx + 1}
+                        </span>
+                        {chunk.section_title && (
+                          <span className="text-xs text-gray-500">{chunk.section_title}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{chunk.content}</p>
+                      {chunk.has_opinion && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <p className="text-xs font-medium text-amber-600 mb-1">检测到观点：</p>
+                          <p className="text-sm text-amber-700">{chunk.opinion_text}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

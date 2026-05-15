@@ -9,15 +9,21 @@ interface AgentStatusProps {
 
 const NODE_LABELS: Record<string, { label: string; icon: string }> = {
   hot_topic: { label: "发现热点话题", icon: " " },
-  topic_filter: { label: "筛选话题", icon: " " },
-  knowledge_retriever: { label: "检索知识", icon: " " },
-  perspective_discovery: { label: "发现观点", icon: " " },
-  angle_planner: { label: "规划内容角度", icon: " " },
-  draft_generator: { label: "生成草稿", icon: " " },
-  style_adapter: { label: "适配风格", icon: " " },
-  citation_verifier: { label: "验证引用", icon: " " },
+  topic_selection: { label: "选择话题", icon: " " },
+  retrieval_and_perspective: { label: "检索与发现观点", icon: " " },
+  content_generation: { label: "生成内容", icon: " " },
+  citation_verification: { label: "验证引用", icon: " " },
   human_review: { label: "等待审核", icon: " " },
-  export: { label: "导出内容", icon: " " },
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "待处理",
+  running: "运行中",
+  waiting_approval: "等待审核",
+  approved: "已批准",
+  rejected: "已拒绝",
+  completed: "已完成",
+  failed: "失败",
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -33,11 +39,12 @@ const STATUS_STYLES: Record<string, string> = {
 export function AgentStatus({ currentNode, status }: AgentStatusProps) {
   const nodeInfo = currentNode ? NODE_LABELS[currentNode] : null;
   const statusStyle = STATUS_STYLES[status] || STATUS_STYLES.pending;
+  const statusLabel = STATUS_LABELS[status] || status;
 
   return (
     <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
       <div className={cn("px-3 py-1 rounded-full text-xs font-medium", statusStyle)}>
-        {status.replace("_", " ").toUpperCase()}
+        {statusLabel}
       </div>
       {nodeInfo && (
         <div className="flex items-center gap-2 text-sm text-gray-700">

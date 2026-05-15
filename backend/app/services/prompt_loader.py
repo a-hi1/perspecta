@@ -85,6 +85,15 @@ class PromptLoader:
         """Load template and return just the content string."""
         return self.load_template(name).content
 
+    def get_full_prompt(self, agent_name: str) -> str:
+        """Load agent prompt with base system prompt prepended.
+
+        Ensures all agents inherit global rules from base.md.
+        """
+        base = self.get_system_prompt_content("base")
+        agent = self.get_agent_prompt_content(agent_name)
+        return f"{base}\n\n---\n\n{agent}"
+
     def list_prompts(self, category: str | None = None) -> list[str]:
         """List available prompt names, optionally filtered by category."""
         results = []

@@ -7,7 +7,7 @@ Each node reads from and writes to this state.
 from enum import Enum
 from typing import Any
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class WorkflowStatus(str, Enum):
@@ -23,32 +23,24 @@ class WorkflowStatus(str, Enum):
 
 
 class AgentNode(str, Enum):
-    """All agent nodes in the workflow."""
+    """Agent nodes in the workflow (6-node pipeline)."""
 
     HOT_TOPIC = "hot_topic"
-    TOPIC_FILTER = "topic_filter"
-    KNOWLEDGE_RETRIEVER = "knowledge_retriever"
-    PERSPECTIVE_DISCOVERY = "perspective_discovery"
-    ANGLE_PLANNER = "angle_planner"
-    DRAFT_GENERATOR = "draft_generator"
-    STYLE_ADAPTER = "style_adapter"
-    CITATION_VERIFIER = "citation_verifier"
+    TOPIC_SELECTION = "topic_selection"
+    RETRIEVAL_AND_PERSPECTIVE = "retrieval_and_perspective"
+    CONTENT_GENERATION = "content_generation"
+    CITATION_VERIFICATION = "citation_verification"
     HUMAN_REVIEW = "human_review"
-    EXPORT = "export"
 
 
 # Valid state transitions
 VALID_TRANSITIONS: dict[AgentNode, list[AgentNode]] = {
-    AgentNode.HOT_TOPIC: [AgentNode.TOPIC_FILTER],
-    AgentNode.TOPIC_FILTER: [AgentNode.KNOWLEDGE_RETRIEVER],
-    AgentNode.KNOWLEDGE_RETRIEVER: [AgentNode.PERSPECTIVE_DISCOVERY],
-    AgentNode.PERSPECTIVE_DISCOVERY: [AgentNode.ANGLE_PLANNER],
-    AgentNode.ANGLE_PLANNER: [AgentNode.DRAFT_GENERATOR],
-    AgentNode.DRAFT_GENERATOR: [AgentNode.STYLE_ADAPTER],
-    AgentNode.STYLE_ADAPTER: [AgentNode.CITATION_VERIFIER],
-    AgentNode.CITATION_VERIFIER: [AgentNode.HUMAN_REVIEW],
-    AgentNode.HUMAN_REVIEW: [AgentNode.EXPORT, AgentNode.DRAFT_GENERATOR],  # Can loop back
-    AgentNode.EXPORT: [],  # Terminal state
+    AgentNode.HOT_TOPIC: [AgentNode.TOPIC_SELECTION],
+    AgentNode.TOPIC_SELECTION: [AgentNode.RETRIEVAL_AND_PERSPECTIVE],
+    AgentNode.RETRIEVAL_AND_PERSPECTIVE: [AgentNode.CONTENT_GENERATION],
+    AgentNode.CONTENT_GENERATION: [AgentNode.CITATION_VERIFICATION],
+    AgentNode.CITATION_VERIFICATION: [AgentNode.HUMAN_REVIEW],
+    AgentNode.HUMAN_REVIEW: [AgentNode.HUMAN_REVIEW, AgentNode.CONTENT_GENERATION],  # Allow pause or loop back
 }
 
 
@@ -152,13 +144,9 @@ class EvaluationData:
 class WorkflowState:
     """Complete state for the content generation workflow.
 
-    This is the state that flows through all nodes in the LangGraph graph.
-    Each node reads specific fields and writes its output to designated fields.
-
-    State flow:
-    HOT_TOPIC -> TOPIC_FILTER -> KNOWLEDGE_RETRIEVER -> PERSPECTIVE_DISCOVERY
-    -> ANGLE_PLANNER -> DRAFT_GENERATOR -> STYLE_ADAPTER -> CITATION_VERIFIER
-    -> HUMAN_REVIEW -> EXPORT
+    6-node pipeline:
+    HOT_TOPIC -> TOPIC_SELECTION -> RETRIEVAL_AND_PERSPECTIVE
+    -> CONTENT_GENERATION -> CITATION_VERIFICATION -> HUMAN_REVIEW
     """
 
     # --- Workflow metadata ---
@@ -214,40 +202,54 @@ class WorkflowState:
 
     # --- Error handling ---
     error: str | None = None
-    retry_count: int = 0
 
     def transition_to(self, node: AgentNode) -> None:
         """Validate and execute a state transition."""
         if self.current_node is not None:
             valid = VALID_TRANSITIONS.get(self.current_node, [])
-            if node not in valid:
+            # Skip validation if transitioning to same node (for terminal nodes like HUMAN_REVIEW)
+            if node not in valid and node != self.current_node:
                 from app.core.exceptions import WorkflowStateError
                 raise WorkflowStateError(
                     current_state=self.current_node.value,
                     target_state=node.value,
                 )
         self.current_node = node
-        self.updated_at = datetime.utcnow().isoformat()
+        self.updated_at = datetime.now(timezone.utc).isoformat()
+
+    def mark_running(self) -> None:
+        """Mark workflow as running."""
+        self.status = WorkflowStatus.RUNNING
+        self.updated_at = datetime.now(timezone.utc).isoformat()
 
     def mark_waiting_approval(self) -> None:
         """Mark workflow as waiting for human approval."""
         self.status = WorkflowStatus.WAITING_APPROVAL
+        self.updated_at = datetime.now(timezone.utc).isoformat()
 
     def mark_approved(self) -> None:
         """Mark workflow as approved by human."""
         self.status = WorkflowStatus.APPROVED
         self.human_approved = True
+        self.updated_at = datetime.now(timezone.utc).isoformat()
 
     def mark_rejected(self, feedback: str = "") -> None:
         """Mark workflow as rejected by human."""
         self.status = WorkflowStatus.REJECTED
         self.human_feedback = feedback
         self.human_approved = False
+        self.updated_at = datetime.now(timezone.utc).isoformat()
+
+    def mark_completed(self) -> None:
+        """Mark workflow as completed."""
+        self.status = WorkflowStatus.COMPLETED
+        self.updated_at = datetime.now(timezone.utc).isoformat()
 
     def mark_failed(self, error: str) -> None:
         """Mark workflow as failed."""
         self.status = WorkflowStatus.FAILED
         self.error = error
+        self.updated_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize state to dict for storage/logging."""

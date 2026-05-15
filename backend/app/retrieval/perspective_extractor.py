@@ -66,7 +66,7 @@ class PerspectiveExtractor:
         chunk_context = self._build_chunk_context(chunks)
 
         # Load prompt
-        prompt_content = self.prompt_loader.get_agent_prompt_content(
+        prompt_content = self.prompt_loader.get_full_prompt(
             "perspective_discovery_agent"
         )
 

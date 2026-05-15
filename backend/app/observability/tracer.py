@@ -116,10 +116,18 @@ class AgentTracer:
         self.trace.status = status
         if final_state:
             self.trace.final_state = final_state
+        self._save_trace()
 
     def finish_with_error(self, error: str) -> None:
         self.finish(status="failed")
         self.trace.error = error
+
+    def _save_trace(self) -> None:
+        """Persist trace to disk."""
+        try:
+            self.trace.save("traces")
+        except Exception:
+            pass  # Trace saving is non-critical
 
 
 class NodeTracerContext:

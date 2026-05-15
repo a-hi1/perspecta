@@ -1,8 +1,8 @@
-"""HotTopicAgent node - discovers trending topics from external sources."""
+"""HotTopic node - discovers trending topics from real sources."""
 
 import json
 import time
-from contextlib import contextmanager
+import httpx
 
 from app.agents.state.workflow_state import (
     WorkflowState, HotTopicData, AgentNode,
@@ -12,13 +12,22 @@ from app.services.prompt_loader import PromptLoader
 from app.observability.logger import AgentLogAdapter
 from app.observability.tracer import AgentTracer
 
+# Fallback topics when API is unavailable
+_FALLBACK_TOPICS = [
+    "AI agent frameworks and autonomous coding",
+    "RAG vs fine-tuning for domain-specific LLMs",
+    "SQLite at scale: lessons from production",
+    "The return of monoliths after microservices fatigue",
+    "LLM cost optimization strategies",
+]
+
 
 class HotTopicNode:
-    """Discovers hot topics from external sources.
+    """Discovers hot topics from real external sources.
 
     Input: WorkflowState with topic_query or auto-discovery
     Output: WorkflowState.hot_topics populated
-    Next: TOPIC_FILTER
+    Next: TOPIC_SELECTION
     """
 
     def __init__(self, llm: BaseLLMProvider, prompt_loader: PromptLoader):
@@ -29,20 +38,18 @@ class HotTopicNode:
     async def execute(
         self, state: WorkflowState, tracer: AgentTracer | None = None
     ) -> WorkflowState:
-        """Execute hot topic discovery."""
         start = time.monotonic()
 
-        # Load prompt
-        prompt = self.prompt_loader.get_agent_prompt_content("hot_topic_agent")
+        prompt = self.prompt_loader.get_full_prompt("hot_topic_agent")
 
-        # For MVP, use LLM to simulate topic discovery
+        # Fetch real trending stories from Hacker News
         source_content = await self._fetch_source_content(state.topic_query)
 
         messages = [
             LLMMessage(role=MessageRole.SYSTEM, content=prompt),
             LLMMessage(
                 role=MessageRole.USER,
-                content=f"Extract and score hot topics from this content:\n\n{source_content}",
+                content=f"从以下内容中提取并评分热点话题，用简体中文输出：\n\n{source_content}",
             ),
         ]
 
@@ -54,7 +61,7 @@ class HotTopicNode:
 
         topics = self._parse_topics(response.content)
         state.hot_topics = topics
-        state.transition_to(AgentNode.HOT_TOPIC)
+        state.transition_to(AgentNode.TOPIC_SELECTION)
 
         latency_ms = (time.monotonic() - start) * 1000
         self.logger.log_execution(
@@ -68,28 +75,68 @@ class HotTopicNode:
         return state
 
     async def _fetch_source_content(self, query: str) -> str:
-        """Fetch content from external sources.
+        """Fetch real trending stories from Hacker News API."""
+        stories = []
 
-        MVP: Returns simulated content.
-        Production: Calls Reddit API, HN API, Arxiv API.
-        """
-        return f"""
-        与以下话题相关的近期技术讨论: {query or "软件工程"}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                # Get top story IDs
+                resp = await client.get(
+                    "https://hacker-news.firebaseio.com/v0/topstories.json"
+                )
+                resp.raise_for_status()
+                story_ids = resp.json()[:15]  # Top 15 stories
 
-        [Hacker News]
-        - "为什么我们从微服务回到了单体架构"
-        - "反对 AI 辅助编程的理由"
-        - "我们用 SQLite 支撑 100 万用户的经历"
+                # Fetch story details concurrently
+                tasks = [
+                    client.get(f"https://hacker-news.firebaseio.com/v0/item/{sid}.json")
+                    for sid in story_ids
+                ]
+                import asyncio
+                results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        [Reddit r/programming]
-        - "不受欢迎的观点：TDD 对创业公司来说被高估了"
-        - "用了 10 年 React 之后，我今天会选择什么"
-        - "我们用这个方法把 AWS 账单降低了 80%"
+                for result in results:
+                    if isinstance(result, Exception):
+                        continue
+                    if result.status_code == 200:
+                        item = result.json()
+                        if item and item.get("title"):
+                            stories.append({
+                                "title": item["title"],
+                                "url": item.get("url", ""),
+                                "score": item.get("score", 0),
+                                "comments": item.get("descendants", 0),
+                                "source": "Hacker News",
+                            })
 
-        [Arxiv]
-        - "重新思考 RAG：为什么仅靠检索是不够的"
-        - "更大语言模型的边际收益递减"
-        """
+        except Exception as e:
+            self.logger.log_execution(
+                input_summary="Fetch HN stories",
+                output_summary=f"API failed: {e}",
+                latency_ms=0,
+                error=str(e),
+            )
+
+        if not stories:
+            # Fallback to curated topics
+            topics_text = "\n".join(
+                f"- {topic}" for topic in _FALLBACK_TOPICS
+            )
+            if query:
+                return f"用户关注的话题: {query}\n\n近期技术热点:\n{topics_text}"
+            return f"近期技术热点:\n{topics_text}"
+
+        # Format real stories for LLM
+        stories_text = "\n".join(
+            f"- [{s['source']}] {s['title']} (热度: {s['score']}, 评论: {s['comments']})"
+            for s in stories
+        )
+
+        context = f"[Hacker News 热门]\n{stories_text}"
+        if query:
+            context = f"用户关注的话题: {query}\n\n{context}"
+
+        return context
 
     def _parse_topics(self, response_text: str) -> list[HotTopicData]:
         """Parse LLM response into HotTopicData objects."""

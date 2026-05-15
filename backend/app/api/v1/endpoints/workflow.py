@@ -1,36 +1,27 @@
 """Agent workflow endpoints."""
 
+from dataclasses import asdict
+
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import select
 from app.schemas.workflow import (
     WorkflowStartRequest,
     WorkflowStateResponse,
     WorkflowApprovalRequest,
     WorkflowRejectionRequest,
 )
-from app.agents.workflow import ContentGenerationWorkflow
-from app.agents.state.workflow_state import WorkflowState, WorkflowStatus
-from app.llm.factory import get_llm_provider
-from app.retrieval.retriever import DualLayerRetriever
-from app.services.prompt_loader import PromptLoader
+from app.services.workflow_service import WorkflowService
+from app.models.workflow_run import WorkflowRun
+from app.db.session import async_session_factory
 
 router = APIRouter()
 
-# In-memory state store for MVP
-# Production would use Redis or database
-_workflow_states: dict[str, WorkflowState] = {}
+# Shared service instance (in-memory state store for MVP)
+_workflow_service = WorkflowService()
 
 
-def _get_workflow() -> ContentGenerationWorkflow:
-    """Create a workflow instance."""
-    llm = get_llm_provider()
-    retriever = DualLayerRetriever(llm)
-    return ContentGenerationWorkflow(llm, retriever)
-
-
-def _state_to_response(state: WorkflowState) -> WorkflowStateResponse:
+def _state_to_response(state) -> WorkflowStateResponse:
     """Convert internal state to API response."""
-    from dataclasses import asdict
-
     draft = state.adapted_draft or state.selected_draft
 
     return WorkflowStateResponse(
@@ -66,21 +57,37 @@ def _state_to_response(state: WorkflowState) -> WorkflowStateResponse:
 async def start_workflow(request: WorkflowStartRequest):
     """Start a new content generation workflow.
 
-    Runs the full pipeline until human review checkpoint.
+    Returns immediately with PENDING status. The pipeline runs in the background.
+    Poll GET /{workflow_id} to track progress.
     """
-    workflow = _get_workflow()
-    state = await workflow.run(
-        user_id="default_user",
-        topic_query=request.topic_query,
-    )
-    _workflow_states[state.workflow_id] = state
+    state = await _workflow_service.create_workflow(request.topic_query)
+    _workflow_service.start_workflow(state)
     return _state_to_response(state)
+
+
+@router.get("/list", response_model=list[WorkflowStateResponse])
+async def list_workflows():
+    """Get all workflow runs (history)."""
+    async with async_session_factory() as session:
+        result = await session.execute(
+            select(WorkflowRun).order_by(WorkflowRun.created_at.desc()).limit(50)
+        )
+        runs = result.scalars().all()
+
+        import json
+        responses = []
+        for run in runs:
+            state_dict = json.loads(run.state_json)
+            state = _workflow_service._dict_to_state(state_dict)
+            responses.append(_state_to_response(state))
+
+        return responses
 
 
 @router.get("/{workflow_id}", response_model=WorkflowStateResponse)
 async def get_workflow_state(workflow_id: str):
     """Get the current state of a workflow."""
-    state = _workflow_states.get(workflow_id)
+    state = await _workflow_service.get_state(workflow_id)
     if not state:
         raise HTTPException(status_code=404, detail="工作流未找到")
     return _state_to_response(state)
@@ -88,49 +95,29 @@ async def get_workflow_state(workflow_id: str):
 
 @router.post("/{workflow_id}/approve", response_model=WorkflowStateResponse)
 async def approve_workflow(workflow_id: str, request: WorkflowApprovalRequest):
-    """Approve a draft and proceed to export.
-
-    Human-in-the-loop: user must explicitly approve.
-    Can optionally provide edited content.
-    """
-    state = _workflow_states.get(workflow_id)
-    if not state:
-        raise HTTPException(status_code=404, detail="工作流未找到")
-    if state.status != WorkflowStatus.WAITING_APPROVAL:
-        raise HTTPException(
-            status_code=400,
-            detail=f"工作流不在等待审核状态。当前状态: {state.status.value}",
+    """Approve a draft and proceed to export."""
+    try:
+        state = await _workflow_service.approve(
+            workflow_id, edited_content=request.edited_content
         )
-
-    workflow = _get_workflow()
-    state = await workflow.approve(state, edited_content=request.edited_content)
-    _workflow_states[workflow_id] = state
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return _state_to_response(state)
 
 
 @router.post("/{workflow_id}/reject", response_model=WorkflowStateResponse)
 async def reject_workflow(workflow_id: str, request: WorkflowRejectionRequest):
-    """Reject a draft and provide feedback for revision.
-
-    The workflow will loop back to draft generation with the feedback.
-    """
-    state = _workflow_states.get(workflow_id)
-    if not state:
-        raise HTTPException(status_code=404, detail="工作流未找到")
-    if state.status != WorkflowStatus.WAITING_APPROVAL:
-        raise HTTPException(
-            status_code=400,
-            detail=f"工作流不在等待审核状态。当前状态: {state.status.value}",
-        )
-
-    workflow = _get_workflow()
-    state = await workflow.reject(state, feedback=request.feedback)
-    _workflow_states[workflow_id] = state
+    """Reject a draft and provide feedback for revision."""
+    try:
+        state = await _workflow_service.reject(workflow_id, feedback=request.feedback)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return _state_to_response(state)
 
 
 @router.get("/{workflow_id}/diagram")
 async def get_workflow_diagram(workflow_id: str):
     """Get a Mermaid diagram of the workflow structure."""
-    workflow = _get_workflow()
+    from app.agents.workflow import ContentGenerationWorkflow
+    workflow = ContentGenerationWorkflow.__new__(ContentGenerationWorkflow)
     return {"diagram": workflow.get_state_diagram()}

@@ -8,6 +8,7 @@ from app.models.draft import Draft, DraftVersion
 from app.models.style_profile import StyleProfile
 from app.models.citation import Citation
 from app.models.agent_run import AgentRunLog
+from app.models.workflow_run import WorkflowRun
 
 __all__ = [
     "User",
@@ -20,4 +21,5 @@ __all__ = [
     "StyleProfile",
     "Citation",
     "AgentRunLog",
+    "WorkflowRun",
 ]

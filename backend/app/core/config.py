@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "deepseek-chat"
     LLM_TEMPERATURE: float = 0.7
     LLM_MAX_TOKENS: int = 4096
+    LLM_TIMEOUT: float = 120.0
+    LLM_MAX_RETRIES: int = 3
 
     # --- LLM API Keys ---
     DEEPSEEK_API_KEY: str = ""
@@ -74,7 +76,7 @@ class Settings(BaseSettings):
     REDDIT_USER_AGENT: str = "PEA/0.1.0"
 
     # --- CORS ---
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
     # --- Observability ---
     LOG_LEVEL: str = "INFO"
